@@ -129,6 +129,38 @@
                       @update:model-value="startDateMenu = false"
                     ></v-date-picker>
                   </v-menu>
+                  <v-row class="mt-2">
+                    <v-col cols="4">
+                      <v-text-field
+                        v-model="startHour"
+                        label="Hour"
+                        type="number"
+                        min="0"
+                        max="23"
+                        prepend-icon="mdi-clock-outline"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="4">
+                      <v-text-field
+                        v-model="startMinute"
+                        label="Minute"
+                        type="number"
+                        min="0"
+                        max="59"
+                        prepend-icon="mdi-clock-outline"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="4">
+                      <v-text-field
+                        v-model="startSecond"
+                        label="Second"
+                        type="number"
+                        min="0"
+                        max="59"
+                        prepend-icon="mdi-clock-outline"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
                 </v-col>
 
                 <v-col cols="12" sm="6">
@@ -153,6 +185,38 @@
                       @update:model-value="endDateMenu = false"
                     ></v-date-picker>
                   </v-menu>
+                  <v-row class="mt-2">
+                    <v-col cols="4">
+                      <v-text-field
+                        v-model="endHour"
+                        label="Hour"
+                        type="number"
+                        min="0"
+                        max="23"
+                        prepend-icon="mdi-clock-outline"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="4">
+                      <v-text-field
+                        v-model="endMinute"
+                        label="Minute"
+                        type="number"
+                        min="0"
+                        max="59"
+                        prepend-icon="mdi-clock-outline"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="4">
+                      <v-text-field
+                        v-model="endSecond"
+                        label="Second"
+                        type="number"
+                        min="0"
+                        max="59"
+                        prepend-icon="mdi-clock-outline"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
                 </v-col>
               </v-row>
 
@@ -247,6 +311,15 @@ const startDateMenu = ref(false);
 const endDateMenu = ref(false);
 const reminderMenu = ref(false);
 const errorMessage = ref(null);
+
+// Time fields - initialize with current time
+const now = new Date();
+const startHour = ref(now.getHours());
+const startMinute = ref(now.getMinutes());
+const startSecond = ref(now.getSeconds());
+const endHour = ref(now.getHours());
+const endMinute = ref(now.getMinutes());
+const endSecond = ref(now.getSeconds());
 
 // Validation rules
 const rules = {
@@ -374,9 +447,9 @@ const updateTodo = async () => {
     // Convert dates to ISO strings using local timezone
     const startDate = new Date(todo.value.start_date);
     const endDate = new Date(todo.value.end_date);
-    // Set time to noon to avoid timezone issues
-    startDate.setHours(12, 0, 0, 0);
-    endDate.setHours(12, 0, 0, 0);
+    // Set time from time inputs
+    startDate.setHours(startHour.value, startMinute.value, startSecond.value, 0);
+    endDate.setHours(endHour.value, endMinute.value, endSecond.value, 0);
     
     const todoData = {
       ...todo.value,
@@ -415,6 +488,14 @@ onMounted(async () => {
       const endDate = new Date(todo.value.end_date);
       todo.value.start_date = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
       todo.value.end_date = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+
+      // Initialize time fields
+      startHour.value = startDate.getHours();
+      startMinute.value = startDate.getMinutes();
+      startSecond.value = startDate.getSeconds();
+      endHour.value = endDate.getHours();
+      endMinute.value = endDate.getMinutes();
+      endSecond.value = endDate.getSeconds();
 
       if (todo.value.reminder) {
         const reminderDate = new Date(todo.value.reminder);

@@ -43,6 +43,15 @@
           </v-card-text>
         </v-card>
       </v-col>
+
+      <v-col cols="12" md="3">
+        <v-card class="mb-4" :color="notificationsStore.unreadCount > 0 ? 'info' : 'grey'">
+          <v-card-text class="text-center">
+            <div class="text-h2">{{ notificationsStore.unreadCount }}</div>
+            <div class="text-subtitle-1">Unread Notifications</div>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
 
 
@@ -242,9 +251,9 @@
               </v-col>
 
               <v-col cols="12" sm="6" md="3">
-                <v-btn block color="warning" to="/profile">
-                  <v-icon left>mdi-account</v-icon>
-                  Profile
+                <v-btn block color="warning" to="/notifications">
+                  <v-icon left>mdi-bell</v-icon>
+                  View Notifications
                 </v-btn>
               </v-col>
             </v-row>
@@ -252,20 +261,83 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title>
+            <span>Recent Notifications</span>
+            <v-spacer></v-spacer>
+            <v-btn icon="mdi-refresh" @click="refreshNotifications"></v-btn>
+          </v-card-title>
+          <v-card-text>
+            <div v-if="loadingNotifications" class="text-center py-4">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            </div>
+
+            <div v-else-if="recentNotifications.length === 0" class="text-center py-4">
+              <p>No recent notifications</p>
+            </div>
+
+            <v-list v-else>
+              <v-list-item
+                v-for="notification in recentNotifications.slice(0, 5)"
+                :key="notification._id"
+                @click="viewNotification(notification._id)"
+                class="notification-item"
+              >
+                <template v-slot:prepend>
+                  <v-avatar :color="getNotificationColor(notification.type)">
+                    <v-icon color="white">
+                      {{ getNotificationIcon(notification.type) }}
+                    </v-icon>
+                  </v-avatar>
+                </template>
+
+                <v-list-item-title>{{ notification.title }}</v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ notification.message }}
+                </v-list-item-subtitle>
+
+                <template v-slot:append>
+                  <v-chip
+                    :color="notification.read ? 'grey' : 'primary'"
+                    size="small"
+                    class="mr-2"
+                  >
+                    {{ notification.read ? 'Read' : 'Unread' }}
+                  </v-chip>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text to="/notifications">View All</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTodosStore } from '@/stores/todos';
 import { useAuthStore } from '@/stores/auth';
+import { useNotificationsStore } from '@/stores/notifications';
 
 const router = useRouter();
 const todosStore = useTodosStore();
 const authStore = useAuthStore();
+const notificationsStore = useNotificationsStore();
 
 const loading = ref(false);
+const loadingNotifications = ref(false);
+
+// Get recent notifications
+const recentNotifications = computed(() => notificationsStore.notifications);
 
 // View todo
 const viewTodo = (id) => {
@@ -344,6 +416,55 @@ const getTodoColor = (theme) => {
   }
 };
 
+// View notification
+const viewNotification = (id) => {
+  router.push({ name: 'notification-detail', params: { id } });
+};
+
+// Refresh notifications
+const refreshNotifications = async () => {
+  loadingNotifications.value = true;
+  try {
+    await notificationsStore.fetchNotifications();
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+  } finally {
+    loadingNotifications.value = false;
+  }
+};
+
+// Get notification color based on type
+const getNotificationColor = (type) => {
+  switch (type) {
+    case 'info':
+      return 'info';
+    case 'warning':
+      return 'warning';
+    case 'error':
+      return 'error';
+    case 'success':
+      return 'success';
+    default:
+      return 'grey';
+  }
+};
+
+// Get notification icon based on type
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case 'info':
+      return 'mdi-information';
+    case 'warning':
+      return 'mdi-alert';
+    case 'error':
+      return 'mdi-alert-circle';
+    case 'success':
+      return 'mdi-check-circle';
+    default:
+      return 'mdi-bell';
+  }
+};
+
 // Initialize on mount
 onMounted(async () => {
   loading.value = true;
@@ -356,6 +477,7 @@ onMounted(async () => {
     // Only fetch todos if user is authenticated
     if (authStore.isAuthenticated) {
       await todosStore.fetchTodos();
+      await notificationsStore.fetchNotifications();
     }
   } catch (error) {
     console.error('Error initializing dashboard:', error);
@@ -371,6 +493,14 @@ onMounted(async () => {
 }
 
 .todo-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.notification-item {
+  cursor: pointer;
+}
+
+.notification-item:hover {
   background-color: rgba(0, 0, 0, 0.04);
 }
 </style>

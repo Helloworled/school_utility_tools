@@ -7,9 +7,12 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const todoRoutes = require('./routes/todos');
 const profileRoutes = require('./routes/profileRoutes');
+const notificationRoutes = require('./routes/notifications');
 
 // Import utilities
 const { scheduleRecurringTodos } = require('./utils/recurrence');
+const { scheduleTodoReminders } = require('./utils/todoReminder');
+const { scheduleCleanupNotifications } = require('./utils/cleanupNotifications');
 
 // Initialize express app
 const app = express();
@@ -28,6 +31,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/school_ut
 app.use('/api/auth', authRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/auth', profileRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -46,4 +50,10 @@ app.listen(PORT, () => {
   
   // Start recurring todos scheduler
   scheduleRecurringTodos();
+
+  // Start todo reminders scheduler
+  scheduleTodoReminders();
+
+  // Start cleanup notifications scheduler
+  scheduleCleanupNotifications();
 });

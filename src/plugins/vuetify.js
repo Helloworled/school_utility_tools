@@ -10,6 +10,12 @@ const vuetify = createVuetify({
   icons: {
     defaultSet: 'mdi',
   },
+  theme: {
+    defaultTheme: 'light',
+    variations: {
+      colors: ['primary', 'secondary', 'accent', 'error', 'info', 'success', 'warning'],
+    },
+  },
 })
 
 export default vuetify

@@ -29,6 +29,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         allDay: true,
         backgroundColor: getEventColor(event),
         borderColor: getEventColor(event),
+        textColor: getEventTextColor(event),
         extendedProps: {
           status: event.status,
           category: event.category,
@@ -208,6 +209,17 @@ export const useCalendarStore = defineStore('calendar', () => {
 
     // Default to grey
     return themeColors.grey;
+  };
+
+  // Helper function to get text color based on background color
+  const getEventTextColor = (event) => {
+    // Use black text for white and yellow themes
+    if (event.theme === 'white' || event.theme === 'yellow') {
+      return '#000000';
+    }
+
+    // Use white text for all other themes
+    return '#FFFFFF';
   };
 
   return {

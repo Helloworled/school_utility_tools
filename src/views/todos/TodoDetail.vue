@@ -86,14 +86,14 @@
             <v-row>
               <v-col cols="12">
                 <h3>Created</h3>
-                <p>{{ formatDate(todo.created_at) }}</p>
+                <p>{{ formatDate(todo.createdAt) }}</p>
               </v-col>
             </v-row>
 
-            <v-row v-if="todo.updated_at !== todo.created_at">
+            <v-row v-if="todo.updatedAt !== todo.createdAt">
               <v-col cols="12">
                 <h3>Last Updated</h3>
-                <p>{{ formatDate(todo.updated_at) }}</p>
+                <p>{{ formatDate(todo.updatedAt) }}</p>
               </v-col>
             </v-row>
           </v-card-text>
@@ -161,12 +161,13 @@ const loading = ref(false);
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    second: '2-digit'
   });
 };
 

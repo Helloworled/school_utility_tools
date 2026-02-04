@@ -15,6 +15,8 @@ const TodoEdit = () => import('@/views/todos/TodoEdit.vue')
 const TodoDetail = () => import('@/views/todos/TodoDetail.vue')
 const Dashboard = () => import('@/views/Dashboard.vue')
 const home = () => import('@/views/HomeView.vue')
+const NotificationList = () => import('@/views/notifications/NotificationList.vue')
+const NotificationDetail = () => import('@/views/notifications/NotificationDetail.vue')
 
 const routes = [
   {
@@ -94,6 +96,18 @@ const routes = [
     path: '/todos/:id/edit',
     name: 'todo-edit',
     component: TodoEdit,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/notifications',
+    name: 'notifications',
+    component: NotificationList,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/notifications/:id',
+    name: 'notification-detail',
+    component: NotificationDetail,
     meta: { requiresAuth: true }
   }
 ]
