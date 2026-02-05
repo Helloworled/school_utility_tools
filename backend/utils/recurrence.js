@@ -17,6 +17,7 @@ const updateRecurringTodos = async () => {
     for (const todo of dueTodos) {
       let newStartDate = new Date(todo.start_date);
       let newEndDate = new Date(todo.end_date);
+      console.log('todo recurence: ',todo.recurrence)
 
       // Calculate new dates based on recurrence type
       switch (todo.recurrence) {
@@ -72,7 +73,7 @@ const updateRecurringTodos = async () => {
 // Schedule a job to run daily at midnight
 const scheduleRecurringTodos = () => {
   // Run every day at midnight
-  cron.schedule('0 0 * * *', updateRecurringTodos);
+  cron.schedule('5 0 * * *', updateRecurringTodos);
   console.log('Recurring todos scheduler started');
 };
 
