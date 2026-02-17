@@ -26,9 +26,10 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = response.data.accessToken;
         refreshToken.value = response.data.refreshToken;
 
-        // Store tokens in localStorage
+        // Store tokens and user_id in localStorage
         localStorage.setItem('accessToken', accessToken.value);
         localStorage.setItem('refreshToken', refreshToken.value);
+        localStorage.setItem('user_id', response.data.user._id);
       }
 
       return response;
@@ -52,9 +53,10 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = response.data.accessToken;
         refreshToken.value = response.data.refreshToken;
 
-        // Store tokens in localStorage
+        // Store tokens and user_id in localStorage
         localStorage.setItem('accessToken', accessToken.value);
         localStorage.setItem('refreshToken', refreshToken.value);
+        localStorage.setItem('user_id', response.data.user._id);
       }
 
       return response;
@@ -83,6 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
       refreshToken.value = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user_id');
       loading.value = false;
     }
   };
@@ -99,9 +102,13 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = response.data.accessToken;
         refreshToken.value = response.data.refreshToken;
 
-        // Update tokens in localStorage
+        // Update tokens and user_id in localStorage
         localStorage.setItem('accessToken', accessToken.value);
         localStorage.setItem('refreshToken', refreshToken.value);
+        if (response.data.user) {
+          localStorage.setItem('user_id', response.data.user._id);
+          user.value = response.data.user;
+        }
       }
 
       return response;
@@ -170,6 +177,7 @@ export const useAuthStore = defineStore('auth', () => {
       refreshToken.value = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user_id');
       
       return response;
     } catch (err) {
@@ -237,9 +245,10 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = response.data.accessToken;
         refreshToken.value = response.data.refreshToken;
 
-        // Store tokens in localStorage
+        // Store tokens and user_id in localStorage
         localStorage.setItem('accessToken', accessToken.value);
         localStorage.setItem('refreshToken', refreshToken.value);
+        localStorage.setItem('user_id', response.data.user._id);
       }
 
       return response;
@@ -255,7 +264,10 @@ export const useAuthStore = defineStore('auth', () => {
   const initializeAuth = async () => {
     if (accessToken.value && !user.value) {
       try {
-        await getCurrentUser();
+        const response = await getCurrentUser();
+        if (response.success && response.data.user) {
+          localStorage.setItem('user_id', response.data.user._id);
+        }
       } catch (err) {
         // If getting user fails, clear tokens directly without calling logout API
         user.value = null;
@@ -263,6 +275,7 @@ export const useAuthStore = defineStore('auth', () => {
         refreshToken.value = null;
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user_id');
       }
     }
   };

@@ -13,7 +13,8 @@ const userSockets = new Map();
  */
 const registerUser = (userId, socket) => {
   userSockets.set(userId, socket);
-  console.log(`User ${userId} connected to notification service`);
+  console.log(`[Push Notification] User ${userId} connected to notification service (socket id: ${socket.id})`);
+  console.log(`[Push Notification] Total connected users: ${userSockets.size}`);
 };
 
 /**
@@ -22,7 +23,8 @@ const registerUser = (userId, socket) => {
  */
 const unregisterUser = (userId) => {
   userSockets.delete(userId);
-  console.log(`User ${userId} disconnected from notification service`);
+  console.log(`[Push Notification] User ${userId} disconnected from notification service`);
+  console.log(`[Push Notification] Total connected users: ${userSockets.size}`);
 };
 
 /**
@@ -38,9 +40,10 @@ const sendNotificationToUser = (userId, notification) => {
       type: 'new',
       data: notification
     });
-    console.log(`Notification sent to user ${userId}`);
+    console.log(`[Push Notification] Notification sent to user ${userId} (socket id: ${socket.id})`);
   } else {
-    console.log(`User ${userId} not connected, notification will be stored only`);
+    console.log(`[Push Notification] User ${userId} not connected, notification will be stored only`);
+    console.log(`[Push Notification] Current connected users: ${Array.from(userSockets.keys()).join(', ')}`);
   }
 };
 
@@ -67,6 +70,7 @@ const getConnectedUserCount = () => {
 };
 
 module.exports = {
+  userSockets,
   registerUser,
   unregisterUser,
   sendNotificationToUser,

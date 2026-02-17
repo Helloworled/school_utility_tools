@@ -1,6 +1,7 @@
 const jwt = require('../utils/jwt');
 const Token = require('../models/Token');
 const User = require('../models/User');
+const SemiAuth = require('../models/SemiAuth');
 
 // Authenticate user with JWT
 const authenticate = async (req, res, next) => {
@@ -71,7 +72,49 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
+// Semi-auth authentication - allows access to public folders
+const semiAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        message: 'Semi-authentication required'
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Get semi-auth session from database
+    const semiAuthSession = await SemiAuth.findOne({ sessionToken: token, status: 'active' });
+
+    if (!semiAuthSession) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid semi-auth token'
+      });
+    }
+
+    // Attach semi-auth user to request
+    req.semiAuthUser = {
+      username: semiAuthSession.username,
+      sessionToken: semiAuthSession.sessionToken,
+      sessionId: semiAuthSession.sessionId
+    };
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Semi-authentication failed',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   authenticate,
-  optionalAuth
+  optionalAuth,
+  semiAuth
 };

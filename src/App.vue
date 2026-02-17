@@ -10,8 +10,10 @@
         <v-btn to="/dashboard" text>Dashboard</v-btn>
         <v-btn to="/calendar" text>Calendar</v-btn>
         <v-btn to="/todos" text>Todos</v-btn>
+        <v-btn to="/files" text>Files</v-btn>
         <v-btn to="/notifications" text>Notifications</v-btn>
         <NotificationBadge />
+        <SemiAuthBadge />
         <v-btn to="/profile" text>Profile</v-btn>
         <v-btn text @click="handleLogout">Logout</v-btn>
       </template>
@@ -20,6 +22,7 @@
       <template v-else>
         <v-btn to="/login" text>Login</v-btn>
         <v-btn to="/register" text>Register</v-btn>
+        <v-btn to="/semi-auth" text>Semi-auth</v-btn>
       </template>
     </v-app-bar>
     
@@ -36,6 +39,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { initializeWebSocket, disconnectWebSocket } from '@/plugins/websocket';
 import NotificationBadge from '@/components/NotificationBadge.vue';
+import SemiAuthBadge from '@/components/SemiAuthBadge.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -43,6 +47,11 @@ const authStore = useAuthStore();
 // Initialize auth state on app mount
 onMounted(async () => {
   await authStore.initializeAuth();
+
+  // Initialize semi-auth state from storage
+  const { useSemiAuthStore } = await import('@/stores/semiAuth');
+  const semiAuthStore = useSemiAuthStore();
+  semiAuthStore.initializeFromStorage();
 
   // Initialize WebSocket if user is authenticated
   if (authStore.isAuthenticated) {

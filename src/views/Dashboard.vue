@@ -251,6 +251,13 @@
               </v-col>
 
               <v-col cols="12" sm="6" md="3">
+                <v-btn block color="primary" to="/files">
+                  <v-icon left>mdi-folder</v-icon>
+                  Files
+                </v-btn>
+              </v-col>
+
+              <v-col cols="12" sm="6" md="3">
                 <v-btn block color="warning" to="/notifications">
                   <v-icon left>mdi-bell</v-icon>
                   View Notifications

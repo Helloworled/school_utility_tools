@@ -1,4 +1,5 @@
 const Notification = require('../models/Notification');
+const pushNotificationService = require('./pushNotificationService');
 
 /**
  * Create a new notification
@@ -22,6 +23,10 @@ const createNotification = async (userId, title, message, type = 'info', related
     });
 
     await notification.save();
+
+    // 立即通过 WebSocket 推送通知
+    pushNotificationService.sendNotificationToUser(userId, notification);
+
     return notification;
   } catch (error) {
     console.error('Error creating notification:', error);

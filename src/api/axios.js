@@ -46,8 +46,13 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Check if this is a semi-auth request (has semi-auth headers)
+    const isSemiAuthRequest = originalRequest.headers['x-semi-auth-token'] || 
+                            originalRequest.headers['x-semi-auth-session-id'];
+
     // If error is 401 and we haven't tried to refresh token yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // AND this is NOT a semi-auth request
+    if (error.response?.status === 401 && !originalRequest._retry && !isSemiAuthRequest) {
       originalRequest._retry = true;
 
       const authStore = useAuthStore();

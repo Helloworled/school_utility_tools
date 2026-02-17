@@ -17,6 +17,10 @@ const Dashboard = () => import('@/views/Dashboard.vue')
 const home = () => import('@/views/HomeView.vue')
 const NotificationList = () => import('@/views/notifications/NotificationList.vue')
 const NotificationDetail = () => import('@/views/notifications/NotificationDetail.vue')
+const SemiAuthView = () => import('@/views/semi-auth/SemiAuthView.vue')
+const SemiAuthFileView = () => import('@/views/semi-auth/SemiAuthFileView.vue')
+const FileView = () => import('@/views/files/FileView.vue')
+const ShareView = () => import('@/views/files/ShareView.vue')
 
 const routes = [
   {
@@ -109,6 +113,30 @@ const routes = [
     name: 'notification-detail',
     component: NotificationDetail,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/semi-auth',
+    name: 'semi-auth',
+    component: SemiAuthView,
+    meta: { guest: true }
+  },
+  {
+    path: '/semi-auth/files',
+    name: 'semi-auth-files',
+    component: SemiAuthFileView,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/files',
+    name: 'files',
+    component: FileView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/share/:code',
+    name: 'share',
+    component: ShareView,
+    meta: { requiresAuth: false }
   }
 ]
 
@@ -128,7 +156,8 @@ router.beforeEach(async (to, from, next) => {
   const isGuestRoute = to.matched.some(record => record.meta.guest)
   
   // Initialize auth state from localStorage
-  if (!authStore.user && authStore.accessToken) {
+  // 只在需要认证的路由上验证 token，避免在登录/注册页面上触发
+  if (!authStore.user && authStore.accessToken && requiresAuth) {
     try {
       await authStore.getCurrentUser()
     } catch (error) {

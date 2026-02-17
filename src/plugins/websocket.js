@@ -6,7 +6,7 @@
 import { io } from 'socket.io-client';
 import { useNotificationsStore } from '@/stores/notifications';
 
-const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:5000';
 
 let socket = null;
 
@@ -16,7 +16,7 @@ let socket = null;
 export const initializeWebSocket = () => {
   // Create socket connection
   socket = io(`${API_URL}`, {
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionAttempts: 5
@@ -29,7 +29,10 @@ export const initializeWebSocket = () => {
     // Register user after connection
     const userId = localStorage.getItem('user_id');
     if (userId) {
+      console.log(`Registering user ${userId} for notifications`);
       socket.emit('register', userId);
+    } else {
+      console.warn('No user_id found in localStorage, cannot register for notifications');
     }
   });
 
@@ -55,7 +58,10 @@ export const initializeWebSocket = () => {
     // Re-register user after reconnection
     const userId = localStorage.getItem('user_id');
     if (userId) {
+      console.log(`Re-registering user ${userId} for notifications`);
       socket.emit('register', userId);
+    } else {
+      console.warn('No user_id found in localStorage, cannot register for notifications');
     }
   });
 

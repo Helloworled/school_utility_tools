@@ -8,11 +8,16 @@ const authRoutes = require('./routes/auth');
 const todoRoutes = require('./routes/todos');
 const profileRoutes = require('./routes/profileRoutes');
 const notificationRoutes = require('./routes/notifications');
+const semiAuthRoutes = require('./routes/semiAuthRoutes');
+const fileStorageRoutes = require('./routes/fileStorage');
 
 // Import utilities
 const { scheduleRecurringTodos } = require('./utils/recurrence');
 const { scheduleTodoReminders } = require('./utils/todoReminder');
 const { scheduleCleanupNotifications } = require('./utils/cleanupNotifications');
+const semiAuthService = require('./services/semiAuthService');
+const { initializeWebSocket } = require('./websocket');
+const { startPeriodicCheck: startNotificationCheck, stopPeriodicCheck: stopNotificationCheck } = require('./services/notificationCheckService');
 
 // Initialize express app
 const app = express();
@@ -32,6 +37,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/auth', profileRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/semi-auth', semiAuthRoutes);
+app.use('/api/files', fileStorageRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -45,9 +52,12 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  
+
+  // Initialize WebSocket server
+  initializeWebSocket(server);
+
   // Start recurring todos scheduler
   scheduleRecurringTodos();
 
@@ -56,4 +66,25 @@ app.listen(PORT, () => {
 
   // Start cleanup notifications scheduler
   scheduleCleanupNotifications();
+
+  // Start semi-auth cleanup scheduler
+  semiAuthService.startCleanupScheduler();
+
+  // Start notification check service
+  startNotificationCheck();
+});
+
+// Add graceful shutdown handler
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, stopping schedulers...');
+  semiAuthService.stopCleanupScheduler();
+  stopNotificationCheck();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, stopping schedulers...');
+  semiAuthService.stopCleanupScheduler();
+  stopNotificationCheck();
+  process.exit(0);
 });
